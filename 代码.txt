@@ -1,0 +1,173 @@
+
+!Ch1-Q1
+program matrix_io
+    implicit none
+    integer, parameter :: n = 5
+    integer :: i, j
+    integer :: matrix(n, n)
+    character(len=*), parameter :: filename = 'data.txt'
+    
+    ! 1) 输入读取
+    write(*,*) 'Please enter the 5x5 matrix (row-wise):'
+    do i = 1, n
+        read(*,*) (matrix(i, j), j = 1, n)
+    end do
+    
+    ! 2) 写入文件
+    open(unit=10, file=filename, status='replace', action='write')
+    do i = 1, n
+        write(10, '(5I4)') (matrix(i, j), j = 1, n)
+    end do
+    close(10)
+    write(*,*) 'Data has been written to ', filename
+    
+    ! 3) 读取文件
+    open(unit=11, file=filename, status='old', action='read')
+    do i = 1, n
+        read(11, *) (matrix(i, j), j = 1, n)
+    end do
+    close(11)
+    
+    ! 4) 输出屏幕
+    write(*,*) 'Matrix read from file:'
+    do i = 1, n
+        write(*, '(5I6)') (matrix(i, j), j = 1, n)
+    end do
+stop
+end program matrix_io
+
+
+
+
+
+
+
+
+!Ch1-Q2
+program matrix_vector_operations
+    implicit none
+    integer, parameter :: n = 5
+    integer :: A(n, n), b(n), Ab(n), bTAb
+    integer :: i, j
+    
+    ! 初始化
+    data A / 4, 2, 2, 5, 8, &
+             2, 5, 1, 3, 4, &
+             2, 1, 6, 2, 6, &
+             5, 3, 2, 1, 3, &
+             8, 4, 6, 3, 3  /
+    
+    data b / 2, 4, 5, 2, 1 /
+    
+    ! 显示输入矩阵和向量
+    write(*,*) '矩阵 A:'
+    do i = 1, n
+        write(*, '(5I8)') (A(i, j), j = 1, n)
+    end do
+    
+    write(*,*) 
+    write(*,*) '向量 b:'
+    write(*, '(5I8)') b
+    write(*,*) 
+    
+
+    call matrix_vector_op(A, b, Ab, bTAb)
+    
+    ! 显示计算结果
+    write(*,*) '计算结果:'
+    write(*,*) 'A * b ='
+    write(*, '(5I10)') Ab
+    
+    write(*,*) 
+    write(*,*) 'b^T * A * b =', bTAb
+    
+
+contains
+
+    subroutine matrix_vector_op(A, b, Ab, bTAb)
+        implicit none
+        integer, intent(in) :: A(:,:)    
+        integer, intent(in) :: b(:)      
+        integer, intent(out) :: Ab(:)    
+        integer, intent(out) :: bTAb     
+        
+        integer :: i, j, n
+        integer :: temp(size(b))
+        
+        ! 获取矩阵维度并检查
+        n = size(b)
+        if (size(A, 1) /= n .or. size(A, 2) /= n) then
+            write(*,*) '错误：矩阵和向量维度不匹配！'
+            stop
+        end if
+        
+        ! 计算 A * b (矩阵乘以向量)
+        do i = 1, n
+            Ab(i) = 0.0
+            do j = 1, n
+                Ab(i) = Ab(i) + A(i, j) * b(j)
+            end do
+        end do
+        
+        ! 计算 b^T * (A*b)
+        bTAb = 0.0
+        do i = 1, n
+            bTAb = bTAb + b(i) * Ab(i)
+        end do
+        
+    end subroutine matrix_vector_op
+
+end program matrix_vector_operations
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+!Ch1-Q3
+program main
+    implicit none
+    integer :: n, m
+    integer(kind=8) :: P, C
+    
+    !输入常数n,m
+    write(*,*) 'Enter n:'
+    read(*,*) n
+    write(*,*) 'Enter m:'
+    read(*,*) m
+    
+    call perm_comb(n, m, P, C)
+    
+    !输出排列数和组合数
+    write(*,*) 'P(', n, ',', m, ') = ', P
+    write(*,*) 'C(', n, ',', m, ') = ', C
+    
+    end program
+
+    !排列数和组合数的具体运算
+subroutine perm_comb(n, m, P, C)
+    integer, intent(in) :: n, m
+    integer(kind=8), intent(out) :: P, C
+    integer :: i
+    
+    P = 1
+    do i = 0, m - 1
+        P = P * (n - i)
+    end do
+    
+    C = P
+    do i = 2, m
+        C = C / i
+    end do
+    
+end subroutine
